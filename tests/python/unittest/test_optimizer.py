@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import itertools
 import numpy as np
 import itertools
 import mxnet as mx
@@ -436,9 +435,50 @@ def test_nag():
                             compare_optimizer(opt1(**kwarg), opt2(**kwarg), shape, dtype)
 
 
+#SGLD
+class PySGLD(mx.optimizer.Optimizer):
+    """python reference implementation of SGLD"""
+
+    def __init__(self, **kwargs):
+        super(PySGLD, self).__init__(**kwargs)
+
+    def create_state(self, index, weight):
+        return None
+
+    def update(self, index, weight, grad, state):
+        assert(isinstance(weight, mx.nd.NDArray))
+        assert(isinstance(grad, mx.nd.NDArray))
+        self._update_count(index)
+        lr = self._get_lr(index)
+        wd = self._get_wd(index)
+
+        grad = grad * self.rescale_grad
+        if self.clip_gradient is not None:
+            grad = mx.nd.clip(grad, -self.clip_gradient, self.clip_gradient)
+        weight[:] += - lr/2 * (grad + wd * weight) + mx.random.normal(0, math.sqrt(lr), shape=weight.shape,
+                                                            dtype=weight.dtype, ctx=weight.context)
+
+# TODO: figure out why the big difference
+
+@with_seed()
+def test_sgld():
+    opt1 = PySGLD
+    opt2 = mx.optimizer.SGLD
+    shape = (3, 4, 5)
+    cg_options = [{}, {'clip_gradient': 0.4}, {'clip_gradient': 0.5}]
+    wd_options = [{}, {'wd': 0.03}, {'wd': 0.05}, {'wd': 0.07}]
+    mp_options = [{}, {'multi_precision': False}, {'multi_precision': True}]
+    for dtype in [np.float16, np.float32, np.float64]:
+        for params in itertools.product(cg_options, wd_options, mp_options):
+            kwarg = {k: v for param in params for k, v in param.items()}
+            if (dtype == np.float16 and
+                    ('multi_precision' not in kwarg or
+                     not kwarg['multi_precision'])):
+                continue
+            compare_optimizer(opt1(**kwarg), opt2(**kwarg), shape, dtype, rtol=1e-3, atol=1e-4)
+
 
 # FTML
-
 class PyFTML(mx.optimizer.Optimizer):
     """python reference implemenation of FTML"""
     def __init__(self, beta1=0.6, beta2=0.999, epsilon=1e-8, **kwargs):
@@ -453,7 +493,7 @@ class PyFTML(mx.optimizer.Optimizer):
                 mx.nd.zeros(weight.shape, weight.context, dtype=weight.dtype)) # z_0
 
     def update(self, index, weight, grad, state):
-        assert(isinstance(weight, mx.nd. NDArray))
+        assert(isinstance(weight, mx.nd.NDArray))
         assert(isinstance(grad, mx.nd.NDArray))
         self._update_count(index)
         lr = self._get_lr(index)
