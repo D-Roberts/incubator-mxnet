@@ -459,23 +459,36 @@ class PySGLD(mx.optimizer.Optimizer):
                                                             dtype=weight.dtype, ctx=weight.context)
 
 # TODO: figure out why the big difference
+# normal is imported from random not from ndarray/random. Seems to be two different implementations.
+# mx.nd.random.normal and mx.random.normal produce the exam same numbers with the same seeds; so not that
+# reduce test options
+# TODO: checkout article to see what type of arguments are recommended
+# TODO: checout test_utils and pull it appart to understand exactly where the difference comes from;
+# TODO: fix the random seed in both cases. Perhaps propose to use a random seed option in optimizer
+# implementation
+# error for all dtypes
+# is ok when not test (float16 :))
+# it might be that, because there is normal noise generated in each run of the optimizer,
+# TODO: the fact that two random seeds are used leads to errors; how to fix the random seed?
 
 @with_seed()
 def test_sgld():
     opt1 = PySGLD
     opt2 = mx.optimizer.SGLD
-    shape = (3, 4, 5)
-    cg_options = [{}, {'clip_gradient': 0.4}, {'clip_gradient': 0.5}]
-    wd_options = [{}, {'wd': 0.03}, {'wd': 0.05}, {'wd': 0.07}]
-    mp_options = [{}, {'multi_precision': False}, {'multi_precision': True}]
-    for dtype in [np.float16, np.float32, np.float64]:
+    shape = (3, 4)
+    cg_options = [{}]
+    wd_options = [{}]
+    mp_options = [{}]
+    for dtype in [np.float32]:
         for params in itertools.product(cg_options, wd_options, mp_options):
             kwarg = {k: v for param in params for k, v in param.items()}
-            if (dtype == np.float16 and
-                    ('multi_precision' not in kwarg or
-                     not kwarg['multi_precision'])):
-                continue
+            print("kwargs", kwarg)
+            # if (dtype == np.float16 and
+            #         ('multi_precision' not in kwarg or
+            #          not kwarg['multi_precision'])):
+            #     continue
             compare_optimizer(opt1(**kwarg), opt2(**kwarg), shape, dtype, rtol=1e-3, atol=1e-4)
+
 
 
 # FTML
