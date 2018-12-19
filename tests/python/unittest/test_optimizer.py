@@ -458,37 +458,62 @@ class PySGLD(mx.optimizer.Optimizer):
         weight[:] += - lr/2 * (grad + wd * weight) + mx.random.normal(0, math.sqrt(lr), shape=weight.shape,
                                                             dtype=weight.dtype, ctx=weight.context)
 
-# TODO: figure out why the big difference
-# normal is imported from random not from ndarray/random. Seems to be two different implementations.
-# mx.nd.random.normal and mx.random.normal produce the exam same numbers with the same seeds; so not that
-# reduce test options
-# TODO: checkout article to see what type of arguments are recommended
-# TODO: checout test_utils and pull it appart to understand exactly where the difference comes from;
-# TODO: fix the random seed in both cases. Perhaps propose to use a random seed option in optimizer
-# implementation
-# error for all dtypes
-# is ok when not test (float16 :))
-# it might be that, because there is normal noise generated in each run of the optimizer,
-# TODO: the fact that two random seeds are used leads to errors; how to fix the random seed?
+
 
 @with_seed()
 def test_sgld():
     opt1 = PySGLD
     opt2 = mx.optimizer.SGLD
-    shape = (3, 4)
-    cg_options = [{}]
-    wd_options = [{}]
-    mp_options = [{}]
-    for dtype in [np.float32]:
+    shape = (3, 4, 5)
+    cg_options = [{}, {'clip_gradient': 0.4}, {'clip_gradient': 0.5}]
+    wd_options = [{}, {'wd': 0.03}, {'wd': 0.05}, {'wd': 0.07}]
+    mp_options = [{}, {'multi_precision': False}, {'multi_precision': True}]
+
+    # TODO: what is the best way to do this custom comparison where the seed is fixed for the noise generation?
+    # the optimizer implementation may want to have a seed option
+
+    def compare_optimizer_1(opt1, opt2, shape, dtype, w_stype='default', g_stype='default',
+                            rtol=1e-4, atol=1e-5, compare_states=True):
+        """Compare opt1 and opt2."""
+        if w_stype == 'default':
+            w2 = mx.random.uniform(shape=shape, ctx=default_context(), dtype=dtype)
+            w1 = w2.copyto(default_context())
+        elif w_stype == 'row_sparse' or w_stype == 'csr':
+            w2 = rand_ndarray(shape, w_stype, density=1, dtype=dtype)
+            w1 = w2.copyto(default_context()).tostype('default')
+        else:
+            raise Exception("type not supported yet")
+        if g_stype == 'default':
+            g2 = mx.random.uniform(shape=shape, ctx=default_context(), dtype=dtype)
+            g1 = g2.copyto(default_context())
+        elif g_stype == 'row_sparse' or g_stype == 'csr':
+            g2 = rand_ndarray(shape, g_stype, dtype=dtype)
+            g1 = g2.copyto(default_context()).tostype('default')
+        else:
+            raise Exception("type not supported yet")
+
+        state1 = opt1.create_state_multi_precision(0, w1)
+        state2 = opt2.create_state_multi_precision(0, w2)
+        if compare_states:
+            compare_ndarray_tuple(state1, state2)
+
+        # fix seed for Gaussian noise
+        mx.random.seed(1234)
+        opt1.update_multi_precision(0, w1, g1, state1)
+        mx.random.seed(1234)
+        opt2.update_multi_precision(0, w2, g2, state2)
+        if compare_states:
+            compare_ndarray_tuple(state1, state2, rtol=rtol, atol=atol)
+        assert_almost_equal(w1.asnumpy(), w2.asnumpy(), rtol=rtol, atol=atol)
+
+    for dtype in [np.float16, np.float32, np.float64]:
         for params in itertools.product(cg_options, wd_options, mp_options):
             kwarg = {k: v for param in params for k, v in param.items()}
-            print("kwargs", kwarg)
-            # if (dtype == np.float16 and
-            #         ('multi_precision' not in kwarg or
-            #          not kwarg['multi_precision'])):
-            #     continue
-            compare_optimizer(opt1(**kwarg), opt2(**kwarg), shape, dtype, rtol=1e-3, atol=1e-4)
-
+            if (dtype == np.float16 and
+                    ('multi_precision' not in kwarg or
+                     not kwarg['multi_precision'])):
+                continue
+            compare_optimizer_1(opt1(**kwarg), opt2(**kwarg), shape, dtype)
 
 
 # FTML
