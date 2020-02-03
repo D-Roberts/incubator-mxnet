@@ -59,7 +59,7 @@ template <typename DType>
 struct scalar_pareto_kernel {
   MSHADOW_XINLINE static void Map(index_t i, float a, float *threshold,
                                   DType *out) {
-    out[i] = powf(-log(threshold[i]), DType(1.0/a));
+    out[i] = exp(-log(threshold[i])/a) - DType(1);
   }
 };
 
@@ -83,7 +83,7 @@ struct pareto_kernel {
                                   IType *aparams, float* threshold, OType *out) {
     Shape<ndim> coord = unravel(i, oshape);
     auto idx = static_cast<index_t>(dot(coord, stride));
-    out[i] =  powf(-log(threshold[i]), IType(1.0/aparams[idx]));
+    out[i] =  exp(-log(threshold[i])/aparams[idx]) - IType(1);
   }
 };
 
