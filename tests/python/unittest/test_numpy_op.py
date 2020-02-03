@@ -3592,12 +3592,12 @@ def test_np_random_power():
             test_power = TestRandomPower(shape)
             if hybridize:
                 test_power.hybridize()
-            np_out = _np.random.power(0.6, size = shape)
-            mx_out = test_power(np.array([0.6]))
+            np_out = _np.random.power(1, size = shape)
+            mx_out = test_power(np.array([1]))
 
     for shape in shapes:
-        mx_out = np.random.power(np.array([0.6]), shape)
-        np_out = _np.random.power(np.array([0.6]).asnumpy(), shape)
+        mx_out = np.random.power(np.array(1), shape)
+        np_out = _np.random.power(np.array([1]).asnumpy(), shape)
         assert_almost_equal(mx_out.asnumpy().shape, np_out.shape)
 
     def _test_power_exception(a):

@@ -68,7 +68,7 @@ namespace mxnet_op {
 template <typename IType>
 struct check_legal_a_kernel {
   MSHADOW_XINLINE static void Map(index_t i, IType *a, float* flag) {
-    if (a[i] < 1.0) {
+    if (a[i] <= 0.0) {
       flag[0] = -1.0;
     }
   }
@@ -110,7 +110,7 @@ void NumpyPowerForward(const nnvm::NodeAttrs &attrs,
   Kernel<set_zero, xpu>::Launch(s, 1, indicator_device_ptr);
   prnd->SampleUniform(&workspace, 0.0, 1.0);
   if (param.a.has_value()) {
-    CHECK_GE(param.a.value(), 1.0) << "ValueError: expect a >= 1";
+    CHECK_GT(param.a.value(), 0.0) << "ValueError: expect a > 0";
     MSHADOW_REAL_TYPE_SWITCH(outputs[0].type_flag_, DType, {
       Kernel<scalar_power_kernel<DType>, xpu>::Launch(
         s, outputs[0].Size(), param.a.value(),
@@ -122,7 +122,7 @@ void NumpyPowerForward(const nnvm::NodeAttrs &attrs,
       s, inputs[0].Size(), inputs[0].dptr<IType>(), indicator_device_ptr);
     });
     _copy<xpu>(s, &indicator_host, indicator_device_ptr);
-    CHECK_GE(indicator_host, 0.0) << "ValueError: expect a >= 1";
+    CHECK_GE(indicator_host, 0.0) << "ValueError: expect a > 0";
     mxnet::TShape new_lshape, new_oshape;
     int ndim = FillShape(inputs[0].shape_, inputs[0].shape_, outputs[0].shape_,
                          &new_lshape, &new_lshape, &new_oshape);
