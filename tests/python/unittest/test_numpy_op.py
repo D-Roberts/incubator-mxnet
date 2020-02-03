@@ -3545,64 +3545,77 @@ def test_np_exponential():
         output = np.random.exponential(scale=scale).asnumpy()
     assertRaises(ValueError, _test_exponential_exception, -1)
 
-#TODO: unify tests with list of names and get attrib
-@with_seed()
-@use_np
-def test_np_random_pareto():
-    class TestRandomPareto(HybridBlock):
-        def __init__(self, shape):
-            super(TestRandomPareto, self).__init__()
-            self._shape = shape
-
-        def hybrid_forward(self, F, a):
-            return F.np.random.pareto(a, self._shape)
-
-    shapes = [(), (1,), (2, 3), (4, 0, 5), 6, (7, 8), None]
-    for hybridize in [False, True]:
-        for shape in shapes:
-            test_pareto = TestRandomPareto(shape)
-            if hybridize:
-                test_pareto.hybridize()
-            np_out = _np.random.pareto(1, size = shape)
-            mx_out = test_pareto(np.array([1]))
-
-    for shape in shapes:
-        mx_out = np.random.pareto(np.array([1]), shape)
-        np_out = _np.random.pareto(np.array([1]).asnumpy(), shape)
-        assert_almost_equal(mx_out.asnumpy().shape, np_out.shape)
-
-    def _test_pareto_exception(a):
-        output = np.random.pareto(a=a).asnumpy()
-    assertRaises(ValueError, _test_pareto_exception, -1)
 
 @with_seed()
 @use_np
-def test_np_random_power():
-    class TestRandomPower(HybridBlock):
-        def __init__(self, shape):
-            super(TestRandomPower, self).__init__()
-            self._shape = shape
-
-        def hybrid_forward(self, F, a):
-            return F.np.random.power(a, self._shape)
-
+def test_np_random_a():
+    op_names = ['pareto', 'power']
+    # these distributions have one required parameter a
+    # and similiar generation algorithm
     shapes = [(), (1,), (2, 3), (4, 0, 5), 6, (7, 8), None]
-    for hybridize in [False, True]:
-        for shape in shapes:
-            test_power = TestRandomPower(shape)
-            if hybridize:
-                test_power.hybridize()
-            np_out = _np.random.power(1, size = shape)
-            mx_out = test_power(np.array([1]))
+
+    def _test_random_x_range(output):
+        ge_zero = _np.all(output >= 0)
+        smaller_equal_one = _np.all(output <= 1)
+        return ge_zero and smaller_equal_one
 
     for shape in shapes:
-        mx_out = np.random.power(np.array(1), shape)
-        np_out = _np.random.power(np.array([1]).asnumpy(), shape)
-        assert_almost_equal(mx_out.asnumpy().shape, np_out.shape)
+        for op_name in op_names:
+            op = getattr(np.random, op_name, None)
+            assert op is not None
+            out = op(1, size=shape)
+            expected_shape = shape
+            if not isinstance(shape, tuple):
+                expected_shape = () if shape is None else (shape,)
+            assert out.shape == expected_shape
+            # test range for power distribution
+            if op_name == 'power':
+                assert _test_random_x_range(out.asnumpy()) == True
 
-    def _test_power_exception(a):
-        output = np.random.power(a=a).asnumpy()
-    assertRaises(ValueError, _test_power_exception, -1)
+    class TestRandomA(HybridBlock):
+        def __init__(self, shape, op_name, param):
+            super(TestRandomA, self).__init__()
+            self._shape = shape
+            self._op_name = op_name
+            # Parameter a is not optional for these distributions
+            self._param = param
+
+        def hybrid_forward(self, F, x):
+            op = getattr(F.np.random, self._op_name, None)
+            assert op is not None
+            return x + op(self._param, size=self._shape)
+
+    x = np.ones(())
+    hybridize = [False, True]
+    for [op_name, shape, hybridize] in itertools.product(op_names, shapes, hybridize):
+        net = TestRandomA(shape, op_name, 1)
+        if hybridize:
+            net.hybridize()
+        out = net(x)
+        expected_shape = shape
+        if not isinstance(shape, tuple):
+            expected_shape = () if shape is None else (shape,)
+        assert out.shape == expected_shape
+
+    # test broadcasting of parameter's a shape when a is array-like
+    ashapes = [(1,), (2, 3), (4, 0, 5), 6, (7, 8)]
+    for shape in ashapes:
+        a = np.ones(shape)
+        for op_name in op_names:
+            op = getattr(np.random, op_name, None)
+            assert op is not None
+            out = op(a, size=None)
+            expected_shape = shape
+            if not isinstance(shape, tuple):
+                expected_shape = () if shape is None else (shape,)
+            assert out.shape == expected_shape
+
+    def _test_exception(a):
+        output = op(a=a).asnumpy()
+    for op in op_names:
+        op = getattr(np.random, op_name, None)
+        if op is not None:
+            assertRaises(ValueError, _test_exception, -1)
 
 
 @with_seed()
