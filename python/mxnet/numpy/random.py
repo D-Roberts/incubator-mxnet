@@ -22,7 +22,67 @@ from ..ndarray import numpy as _mx_nd_np
 
 
 __all__ = ["randint", "uniform", "normal", "choice", "rand", "multinomial", "multivariate_normal",
-           "shuffle", "randn", "gamma", 'beta', "exponential"]
+           "shuffle", "randn", "gamma", 'beta', "exponential", "pareto", "power"]
+
+
+def pareto(a, size=None):
+    r"""Draw samples from a 1-parameter Weibull distribution with given parameter a
+    via inversion.
+    Parameters
+    ----------
+    a : float or array_like of floats
+        Shape of the distribution. Must be non-negative.
+    size : int or tuple of ints, optional
+        Output shape.  If the given shape is, e.g., ``(m, n, k)``, then
+        ``m * n * k`` samples are drawn.  If size is ``None`` (default),
+        a single value is returned if ``a`` is a scalar. Otherwise,
+        ``np.array(a).size`` samples are drawn.
+    Returns
+    -------
+    out : ndarray or scalar
+        Drawn samples from the 1-parameter Weibull distribution.
+    Examples
+    --------
+    >>> np.random.weibull(a=5)
+    array(0.9553641)
+    >>> np.random.weibull(a=5, size=[2,3])
+    array([[1.0466299 , 1.1320982 , 0.98415005],
+          [1.1430776 , 0.9532727 , 1.1344457 ]])
+    >>> np.random.weibull(a=np.array([2,3])
+    array([0.98843634, 1.0125613 ])
+   
+    """
+    return _mx_nd_np.random.pareto(a, size)
+
+
+def power(a, size=None):
+    r"""Draw samples from a 1-parameter Weibull distribution with given parameter a
+    via inversion.
+    Parameters
+    ----------
+    a : float or array_like of floats
+        Shape of the distribution. Must be non-negative.
+    size : int or tuple of ints, optional
+        Output shape.  If the given shape is, e.g., ``(m, n, k)``, then
+        ``m * n * k`` samples are drawn.  If size is ``None`` (default),
+        a single value is returned if ``a`` is a scalar. Otherwise,
+        ``np.array(a).size`` samples are drawn.
+    Returns
+    -------
+    out : ndarray or scalar
+        Drawn samples from the 1-parameter Weibull distribution.
+    Examples
+    --------
+    >>> np.random.weibull(a=5)
+    array(0.9553641)
+    >>> np.random.weibull(a=5, size=[2,3])
+    array([[1.0466299 , 1.1320982 , 0.98415005],
+          [1.1430776 , 0.9532727 , 1.1344457 ]])
+    >>> np.random.weibull(a=np.array([2,3])
+    array([0.98843634, 1.0125613 ])
+   
+    """
+    return _mx_nd_np.random.power(a, size)
 
 
 def randint(low, high=None, size=None, dtype=None, ctx=None, out=None):
