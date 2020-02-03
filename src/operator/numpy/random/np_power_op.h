@@ -122,7 +122,7 @@ void NumpyPowerForward(const nnvm::NodeAttrs &attrs,
       s, inputs[0].Size(), inputs[0].dptr<IType>(), indicator_device_ptr);
     });
     _copy<xpu>(s, &indicator_host, indicator_device_ptr);
-    CHECK_GE(indicator_host, 1.0) << "ValueError: expect a >= 1";
+    CHECK_GE(indicator_host, 0.0) << "ValueError: expect a >= 1";
     mxnet::TShape new_lshape, new_oshape;
     int ndim = FillShape(inputs[0].shape_, inputs[0].shape_, outputs[0].shape_,
                          &new_lshape, &new_lshape, &new_oshape);
