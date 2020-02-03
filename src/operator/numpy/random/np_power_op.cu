@@ -28,7 +28,7 @@
 namespace mxnet {
 namespace op {
 
-NNVM_REGISTER_OP(_npi_power)
+NNVM_REGISTER_OP(_npi_powerd)
 .set_attr<FCompute>("FCompute<gpu>", NumpyPowerForward<gpu>);
 
 }  // namespace op

@@ -19,22 +19,22 @@
 
 /*!
  * Copyright (c) 2019 by Contributors
- * \file np_weibull_op.cc
- * \brief Operator for numpy sampling from Weibull distributions
+ * \file np_pareto_op.cc
+ * \brief Operator for numpy sampling from Pareto distributions
  */
 
-#include "./np_weibull_op.h"
+#include "./np_pareto_op.h"
 #include "./dist_common.h"
 
 namespace mxnet {
 namespace op {
 
-DMLC_REGISTER_PARAMETER(NumpyWeibullParam);
+DMLC_REGISTER_PARAMETER(NumpyParetoParam);
 
-NNVM_REGISTER_OP(_npi_weibull)
+NNVM_REGISTER_OP(_npi_pareto)
 .set_num_inputs(
   [](const nnvm::NodeAttrs& attrs) {
-    const NumpyWeibullParam& param = nnvm::get<NumpyWeibullParam>(attrs.parsed);
+    const NumpyParetoParam& param = nnvm::get<NumpyParetoParam>(attrs.parsed);
     int num_inputs = 1;
     if (param.a.has_value()) {
       num_inputs -= 1;
@@ -44,15 +44,15 @@ NNVM_REGISTER_OP(_npi_weibull)
 .set_num_outputs(1)
 .set_attr<nnvm::FListInputNames>("FListInputNames",
   [](const NodeAttrs& attrs) {
-    const NumpyWeibullParam& param = nnvm::get<NumpyWeibullParam>(attrs.parsed);
+    const NumpyParetoParam& param = nnvm::get<NumpyParetoParam>(attrs.parsed);
     int num_inputs = 1;
     if (param.a.has_value()) {
       num_inputs -= 1;
     }
     return (num_inputs == 0) ? std::vector<std::string>() : std::vector<std::string>{"input1"};
   })
-.set_attr_parser(ParamParser<NumpyWeibullParam>)
-.set_attr<mxnet::FInferShape>("FInferShape", UnaryDistOpShape<NumpyWeibullParam>)
+.set_attr_parser(ParamParser<NumpyParetoParam>)
+.set_attr<mxnet::FInferShape>("FInferShape", UnaryDistOpShape<NumpyParetoParam>)
 .set_attr<nnvm::FInferType>("FInferType",
   [](const nnvm::NodeAttrs &attrs, std::vector<int> *in_attrs,  std::vector<int> *out_attrs) {
     (*out_attrs)[0] = mshadow::kFloat32;
@@ -63,10 +63,10 @@ NNVM_REGISTER_OP(_npi_weibull)
       return std::vector<ResourceRequest>{
         ResourceRequest::kRandom, ResourceRequest::kTempSpace};
   })
-.set_attr<FCompute>("FCompute<cpu>", NumpyWeibullForward<cpu>)
+.set_attr<FCompute>("FCompute<cpu>", NumpyParetoForward<cpu>)
 .set_attr<nnvm::FGradient>("FGradient", MakeZeroGradNodes)
 .add_argument("input1", "NDArray-or-Symbol", "Source input")
-.add_arguments(NumpyWeibullParam::__FIELDS__());
+.add_arguments(NumpyParetoParam::__FIELDS__());
 
 }  // namespace op
 }  // namespace mxnet

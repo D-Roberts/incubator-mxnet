@@ -69,9 +69,9 @@ def pareto(a, size):
         size = None
     is_tensor = isinstance(a, tensor_type_name)
     if is_tensor:
-        return _npi.pareto(a, scale=None, size=size)
+        return _npi.pareto(a, a=None, size=size)
     else:
-        return _npi.pareto(scale=a, size=size)
+        return _npi.pareto(a=a, size=size)
 
 
 def power(a, size):
@@ -116,9 +116,9 @@ def power(a, size):
         size = None
     is_tensor = isinstance(a, tensor_type_name)
     if is_tensor:
-        return _npi.power(a, scale=None, size=size)
+        return _npi.powerd(a, a=None, size=size)
     else:
-        return _npi.power(scale=a, size=size)
+        return _npi.powerd(a=a, size=size)
 
 
 def randint(low, high=None, size=None, dtype=None, ctx=None, out=None):
