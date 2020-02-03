@@ -3568,7 +3568,7 @@ def test_np_random_a():
             if not isinstance(shape, tuple):
                 expected_shape = () if shape is None else (shape,)
             assert out.shape == expected_shape
-            # test range for power distribution
+            # test range of generated values for power distribution
             if op_name == 'power':
                 assert _test_random_x_range(out.asnumpy()) == True
 
