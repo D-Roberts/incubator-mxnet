@@ -484,7 +484,7 @@ def pareto(a, size):
 
     Returns
     -------
-    out : _Symbol 
+    out : _Symbol
         Drawn samples from the Pareto distribution.
 
     Examples
