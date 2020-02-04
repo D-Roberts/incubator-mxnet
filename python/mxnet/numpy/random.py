@@ -638,7 +638,7 @@ def pareto(a, size=None):
 
 def power(a, size=None):
     r"""Draw samples in [0, 1] from a power distribution with given parameter a.
-    
+
     Parameters
     ----------
     a : float or array_like of floats
@@ -663,13 +663,13 @@ def power(a, size=None):
            [0.9078098 , 0.87819266, 0.730635]])
     >>> np.random.power(a=np.array([2,3])
     array([0.7499419 , 0.88894516])
-    
+
     The probability density function is f(x; a) = ax^{a-1}, 0 \le x \le 1, a>0.
     The power distribution is just the inverse of the Pareto distribution and
     a special case of the Beta distribution.
     """
     return _mx_nd_np.random.power(a, size)
-           
+
 
 def randn(*size, **kwargs):
     r"""Return a sample (or samples) from the "standard normal" distribution.
