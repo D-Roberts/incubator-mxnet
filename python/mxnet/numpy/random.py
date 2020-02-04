@@ -25,67 +25,6 @@ __all__ = ["randint", "uniform", "normal", "choice", "rand", "multinomial", "mul
            "shuffle", "randn", "gamma", 'beta', "exponential", "lognormal", "pareto", "power"]
 
 
-def pareto(a, size=None):
-    r"""Draw samples from a 1-parameter Weibull distribution with given parameter a
-    via inversion.
-    Parameters
-    ----------
-    a : float or array_like of floats
-        Shape of the distribution. Must be non-negative.
-    size : int or tuple of ints, optional
-        Output shape.  If the given shape is, e.g., ``(m, n, k)``, then
-        ``m * n * k`` samples are drawn.  If size is ``None`` (default),
-        a single value is returned if ``a`` is a scalar. Otherwise,
-        ``np.array(a).size`` samples are drawn.
-    Returns
-    -------
-    out : ndarray or scalar
-        Drawn samples from the 1-parameter Weibull distribution.
-    Examples
-    --------
-    >>> np.random.weibull(a=5)
-    array(0.9553641)
-    >>> np.random.weibull(a=5, size=[2,3])
-    array([[1.0466299 , 1.1320982 , 0.98415005],
-          [1.1430776 , 0.9532727 , 1.1344457 ]])
-    >>> np.random.weibull(a=np.array([2,3])
-    array([0.98843634, 1.0125613 ])
-   
-    """
-    return _mx_nd_np.random.pareto(a, size)
-
-
-def power(a, size=None):
-    r"""Draw samples from a 1-parameter Weibull distribution with given parameter a
-    via inversion.
-    Parameters
-    ----------
-    a : float or array_like of floats
-        Shape of the distribution. Must be non-negative.
-    size : int or tuple of ints, optional
-        Output shape.  If the given shape is, e.g., ``(m, n, k)``, then
-        ``m * n * k`` samples are drawn.  If size is ``None`` (default),
-        a single value is returned if ``a`` is a scalar. Otherwise,
-        ``np.array(a).size`` samples are drawn.
-    Returns
-    -------
-    out : ndarray or scalar
-        Drawn samples from the 1-parameter Weibull distribution.
-    Examples
-    --------
-    >>> np.random.weibull(a=5)
-    array(0.9553641)
-    >>> np.random.weibull(a=5, size=[2,3])
-    array([[1.0466299 , 1.1320982 , 0.98415005],
-          [1.1430776 , 0.9532727 , 1.1344457 ]])
-    >>> np.random.weibull(a=np.array([2,3])
-    array([0.98843634, 1.0125613 ])
-   
-    """
-    return _mx_nd_np.random.power(a, size)
-           
-
-
 def randint(low, high=None, size=None, dtype=None, ctx=None, out=None):
     r"""Return random integers from `low` (inclusive) to `high` (exclusive).
 
@@ -661,6 +600,76 @@ def beta(a, b, size=None, dtype=None, ctx=None):
     """
     return _mx_nd_np.random.beta(a, b, size=size, dtype=dtype, ctx=ctx)
 
+
+def pareto(a, size=None):
+    r"""Draw samples from a Pareto II or Lomax distribution with specified shape a.
+
+    Parameters
+    ----------
+    a : float or array_like of floats
+            Shape of the distribution. Must be > 0.
+    size : int or tuple of ints, optional
+        Output shape.  If the given shape is, e.g., ``(m, n, k)``, then
+        ``m * n * k`` samples are drawn.  If size is ``None`` (default),
+        a single value is returned if ``a`` is a scalar. Otherwise,
+        ``np.array(a).size`` samples are drawn.
+
+    Returns
+    -------
+    out : ndarray or scalar
+        Drawn samples from the Pareto distribution.
+
+    Examples
+    --------
+    >>> np.random.pareto(a=5)
+    array(0.12749612)
+    >>> mx.numpy.random.pareto(a=5, size=[2,3])
+    array([[0.06933999, 0.0344373 , 0.10654891],
+            [0.0311172 , 0.12911797, 0.03370714]])
+    >>> np.random.pareto(a=np.array([2,3])
+    array([0.26636696, 0.15685666])
+
+    The probability density for the Pareto distribution is f(x) = \frac{am^a}{x^{a+1}}
+    where a is the shape and m the scale. Here m is assumed 1. The Pareto distribution
+    is a power law distribution. Pareto created it to describe the wealth in the economy.
+    """
+    return _mx_nd_np.random.pareto(a, size)
+
+
+def power(a, size=None):
+    r"""Draw samples in [0, 1] from a power distribution with given parameter a.
+    
+    Parameters
+    ----------
+    a : float or array_like of floats
+        Shape of the distribution. Must be > 0.
+    size : int or tuple of ints, optional
+        Output shape.  If the given shape is, e.g., ``(m, n, k)``, then
+        ``m * n * k`` samples are drawn.  If size is ``None`` (default),
+        a single value is returned if ``a`` is a scalar. Otherwise,
+        ``np.array(a).size`` samples are drawn.
+
+    Returns
+    -------
+    out : ndarray or scalar
+        Drawn samples from the power distribution.
+
+    Examples
+    --------
+    >>> np.random.power(a=5)
+    array(0.8602478)
+    >>> np.random.power(a=5, size=[2,3])
+    array([[0.988391  , 0.5153122 , 0.9383134 ],
+           [0.9078098 , 0.87819266, 0.730635]])
+    >>> np.random.power(a=np.array([2,3])
+    array([0.7499419 , 0.88894516])
+    
+    The probability density function is f(x; a) = ax^{a-1}, 0 \le x \le 1, a>0.
+    The power distribution is just the inverse of the Pareto distribution and
+    a special case of the Beta distribution.
+    """
+    return _mx_nd_np.random.power(a, size)
+           
 
 def randn(*size, **kwargs):
     r"""Return a sample (or samples) from the "standard normal" distribution.
