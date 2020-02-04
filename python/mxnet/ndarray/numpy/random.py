@@ -620,8 +620,8 @@ def pareto(a, size):
 
 
 def power(a, size):
-   r"""Draw samples in [0, 1] from a power distribution with given parameter a.
-    
+    r"""Draw samples in [0, 1] from a power distribution with given parameter a.
+
     Parameters
     ----------
     a : float or array_like of floats
@@ -650,7 +650,7 @@ def power(a, size):
     The probability density function is f(x; a) = ax^{a-1}, 0 \le x \le 1, a>0.
     The power distribution is just the inverse of the Pareto distribution and
     a special case of the Beta distribution.
-    """ 
+    """
     from ...numpy import ndarray as np_ndarray
     tensor_type_name = np_ndarray
     if size == ():
@@ -659,7 +659,7 @@ def power(a, size):
     if is_tensor:
         return _npi.powerd(a, a=None, size=size)
     else:
-        return _npi.powerd(a=a, size=size)    
+        return _npi.powerd(a=a, size=size)
 
 
 def rand(*size, **kwargs):
