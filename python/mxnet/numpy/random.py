@@ -17,7 +17,6 @@
 
 """Namespace for ops used in imperative programming."""
 
-from __future__ import absolute_import
 from ..ndarray import numpy as _mx_nd_np
 
 
@@ -612,7 +611,7 @@ def exponential(scale=1.0, size=None, ctx=None, out=None):
     return _mx_nd_np.random.exponential(scale, size=size, ctx=ctx, out=out)
 
 
-def weibull(a, size=None):
+def weibull(a, size=None, ctx=None, out=None):
     r"""Draw samples from a 1-parameter Weibull distribution with given parameter a
     via inversion.
 
@@ -654,10 +653,10 @@ def weibull(a, size=None):
     model time to failure, in modeling particle sizes, in information retrieval
     to model dwell time on pages, in quantitative finance to model risk etc.
     """
-    return _mx_nd_np.random.weibull(a, size)
+    return _mx_nd_np.random.weibull(a, size=size, ctx=ctx, out=out)
 
 
-def pareto(a, size=None):
+def pareto(a, size=None, ctx=None, out=None):
     r"""Draw samples from a Pareto II or Lomax distribution with specified shape a.
 
     Parameters
@@ -689,7 +688,7 @@ def pareto(a, size=None):
     where a is the shape and m the scale. Here m is assumed 1. The Pareto distribution
     is a power law distribution. Pareto created it to describe the wealth in the economy.
     """
-    return _mx_nd_np.random.pareto(a, size)
+    return _mx_nd_np.random.pareto(a, size=size, ctx=ctx, out=out)
 
 
 def power(a, size=None):
